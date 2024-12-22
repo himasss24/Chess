@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    #chessboard {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      border: 5px solid #333;
+    }
+
+    .square {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .white {
+      background-color: #f0d9b5;
+    }
+
+    .black {
+      background-color: #b58863;
+    }
+
+    .piece {
+      font-size: 32px;
+      cursor: grab;
+    }
+  </style>
+</head>
+<body>
+  <div id="chessboard"></div>
+
+  <script>
+    const chessboard = document.getElementById("chessboard");
+
+    // Chess pieces using Unicode symbols
+    const pieces = {
+      black: {
+        rook: "♜",
+        knight: "♞",
+        bishop: "♝",
+        queen: "♛",
+        king: "♚",
+        pawn: "♟︎",
+      },
+      white: {
+        rook: "♖",
+        knight: "♘",
+        bishop: "♗",
+        queen: "♕",
+        king: "♔",
+        pawn: "♙",
+      },
+    };
+
+    // Initial board layout
+    const initialBoard = [
+      ["♖", "♘", "♗", "♕", "♔", "♗", "♘", "♖"],
+      ["♙", "♙", "♙", "♙", "♙", "♙", "♙", "♙"],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["♟︎", "♟︎", "♟︎", "♟︎", "♟︎", "♟︎", "♟︎", "♟︎"],
+      ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
+    ];
+
+    // Create board squares
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const square = document.createElement("div");
+        square.classList.add("square", (row + col) % 2 === 0 ? "white" : "black");
+        square.dataset.row = row;
+        square.dataset.col = col;
+
+        const piece = initialBoard[row][col];
+        if (piece) {
+          const pieceElement = document.createElement("div");
+          pieceElement.classList.add("piece");
+          pieceElement.textContent = piece;
+          pieceElement.draggable = true;
+
+          // Add drag events
+          pieceElement.addEventListener("dragstart", (e) => {
+            e.dataTransfer.setData("text/plain", `${row},${col}`);
+          });
+
+          square.appendChild(pieceElement);
+        }
+
+        square.addEventListener("dragover", (e) => e.preventDefault());
+
+        square.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const [startRow, startCol] = e.dataTransfer
+            .getData("text/plain")
+            .split(",")
+            .map(Number);
+          const targetSquare = e.target.closest(".square");
+
+          if (targetSquare && targetSquare !== chessboard.children[startRow * 8 + startCol]) {
+            targetSquare.innerHTML = "";
+            const piece = chessboard.children[startRow * 8 + startCol].querySelector(".piece");
+            chessboard.children[startRow * 8 + startCol].innerHTML = "";
+            targetSquare.appendChild(piece);
+          }
+        });
+
+        chessboard.appendChild(square);
+      }
+    }
+  </script>
+</body>
+</html>
